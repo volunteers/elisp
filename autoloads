@@ -1,0 +1,50 @@
+;;; autoloads --- automatically extracted autoloads
+;;
+;;; Code:
+
+;; Tell Emacs to look for elisp files in this directory.  -- Install
+(add-to-list 'load-path
+              (or (file-name-directory load-file-name) (car load-path)))
+
+
+;;;### (autoloads (install-list-packages install-directory-inplace
+;;;;;;  install-buffer install-file) "install" "install.el" (20753
+;;;;;;  16540))
+;;; Generated autoloads from install.el
+
+(autoload 'install-file "install" "\
+Not documented
+
+\(fn FILE)" t nil)
+
+(autoload 'install-buffer "install" "\
+Install the current elisp buffer as a package.
+The package is install in `install-home-dir', autoloads are added
+to the `install-autoload-file' in that directory and the
+`install-custom-file' is then updated to load these autoloads.
+
+\(fn)" t nil)
+
+(autoload 'install-directory-inplace "install" "\
+Prepare and activate the current directory for use by Emacs.
+Sets up the autoload files, activates them and byte-compiles if needed.
+
+\(fn DIR)" t nil)
+
+(autoload 'install-list-packages "install" "\
+Show the installed packages.
+
+\(fn)" t nil)
+
+;;;***
+
+;;;### (autoloads nil nil ("naquadah-theme.el") (20753 57988 908510))
+
+;;;***
+
+;; Local Variables:
+;; version-control: never
+;; no-byte-compile: t
+;; no-update-autoloads: t
+;; End:
+;;; autoloads ends here
