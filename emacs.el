@@ -1,6 +1,6 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; add the following lines to .emacs ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; add the following two lines to .emacs ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;-----------------------------------------
 ;(add-to-list 'load-path "~/elisp")
@@ -33,7 +33,7 @@
 (tool-bar-mode -1)			    ;remove toolbar
 (menu-bar-mode -1)			    ;remove menu bar
 (scroll-bar-mode -1)			    ;disable scroll bar
-(global-linum-mode t)			    ;display line number
+;(global-linum-mode t)			    ;display line number
 ;(setq column-number-mode t)		    ;display column number
 (setq make-backup-files nil)                ;stop creating those backup~ files 
 (setq auto-save-default nil)                ;stop creating those #auto-save# files
@@ -42,14 +42,23 @@
 (mouse-avoidance-mode 'jump)		    ;?? move mouse when cursor close
 ;(desktop-save-mode 1)			    ;save current files before quit for restart use
 
-(setq mouse-wheel-scroll-amount '(2 ((shift) . 2) ((control) . nil))) ;mouse scroll slower
-(setq mouse-wheel-progressive-speed nil)
+(global-set-key [(control x) (k)] 'kill-this-buffer);; kill buffer without confirmatioin
+
+
+(global-set-key "\M-`" 'other-window)	;switch cursor to other window
+;(global-set-key [C-tab] 'other-window)	; 'previous-buffer, 'next-buffer
+
+(require 'wcy-swbuff)			;C-TAB, C-`, switch current window content
+(global-set-key [(control tab)] 'wcy-switch-buffer-forward)
+(global-set-key [?\C-`] 'wcy-switch-buffer-backward)
 
 
 (when (fboundp 'winner-mode)		    ;C-c <- back to former window layout
       (winner-mode 1))
 
 (require 'smooth-scrolling)
+(setq mouse-wheel-scroll-amount '(2 ((shift) . 2) ((control) . nil))) ;mouse scroll slower
+(setq mouse-wheel-progressive-speed nil)
 
 (require 'ido) 
 (setq ido-enable-flex-matching t)
@@ -84,6 +93,9 @@
 (require 'browse-kill-ring)		;M-y to browse Yank
 (browse-kill-ring-default-keybindings)
 
+(require 'ibuffer)
+(global-set-key (kbd "C-x C-b") 'ibuffer) ;; Use Ibuffer for Buffer List
+
 (require 'buffer-move)			;move the buffer left
 (global-set-key (kbd "<C-S-up>")     'buf-move-up)
 (global-set-key (kbd "<C-S-down>")   'buf-move-down)
@@ -92,9 +104,6 @@
 
 (require 'win-swap)			;C-c o, swap left-right windows
 
-(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t) ;make M-x shell works well
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
 (defun backward-delete-word (arg)	;in minibuffer, M-backspce will not copy
   "Delete characters backward until encountering the beginning of a word.
 With argument ARG, do this that many times."
@@ -102,6 +111,9 @@ With argument ARG, do this that many times."
   (delete-region (point) (progn (backward-word arg) (point))))
 (define-key minibuffer-local-map [M-backspace] 'backward-delete-word)
 
+;; multi-term config
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t) ;make M-x shell works well
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (autoload 'multi-term "multi-term" nil t)
 (autoload 'multi-term-next "multi-term" nil t)
 (setq multi-term-program "/bin/bash")
@@ -114,10 +126,10 @@ With argument ARG, do this that many times."
 (require 'scroll-other-window)		;C-N,P       C-{,}
 
 (require 'iy-go-to-char)		;not useful if have ace-jump-mode
-;(global-set-key (kbd "C-c f") 'iy-go-to-char)
-;(global-set-key (kbd "C-c F") 'iy-go-to-char-backward)
-;(global-set-key (kbd "C-c ;") 'iy-go-to-char-continue)
-;(global-set-key (kbd "C-c ,") 'iy-go-to-char-continue-backward)
+(global-set-key (kbd "C-c f") 'iy-go-to-char)
+(global-set-key (kbd "C-c F") 'iy-go-to-char-backward)
+(global-set-key (kbd "C-c ;") 'iy-go-to-char-continue)
+(global-set-key (kbd "C-c ,") 'iy-go-to-char-continue-backward)
 
 (require 'key-chord)                  ;;not very useful
 (key-chord-mode 1)
@@ -148,21 +160,122 @@ With argument ARG, do this that many times."
           (add-hook 'c-initialization-hook 'my-make-CR-do-indent)
 
 
-(require 'switch-window)		;overwrite C-c o, show windows #
-(global-set-key [C-tab] 'buf-move-left)
+(require 'switch-window)		;overwrite C-x o, show windows number 1,2,3,4...
 
 
 (require 'uniquify)			;filename not <2><3>etc, not working now...
 (setq uniquify-buffer-name-style 'reverse)
 ;(setq uniquify-buffer-name-style 'forward)
 
-;(setq frame-title-format
-;      (list (format "%s %%S: %%j " (system-name))
-;        '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
+;; show filename and entire directory 
+(setq frame-title-format		;show directory and filename on frame top
+      (list (format "%s %%S: %%j " (system-name))
+        '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
 (defun show-file-name ()		;show directory and filename in minibuffer
   "Show the full path file name in the minibuffer."
   (interactive)
   (message (buffer-file-name)))
-(global-set-key [C-f1] 'show-file-name) ; Or any other key you want
+(global-set-key [C-f1] 'show-file-name) ; 
+
+
+;; C-;  comment/uncomment one line or region
+(defun comment-or-uncomment-region-or-line ()
+    "Comments or uncomments the region or the current line if there's no active region."
+    (interactive)
+    (let (beg end)
+        (if (region-active-p)
+            (setq beg (region-beginning) end (region-end))
+            (setq beg (line-beginning-position) end (line-end-position)))
+        (comment-or-uncomment-region beg end)))
+(global-set-key (kbd "C-;") 'comment-or-uncomment-region-or-line)
+
+;; group ibuffer
+(setq ibuffer-saved-filter-groups
+      '(("home"
+	 ("emacs-config" (or (filename . ".emacs.d")
+			     (filename . "emacs-config")))
+         ("martinowen.net" (filename . "martinowen.net"))
+	 ("Org" (or (mode . org-mode)
+		    (filename . "OrgMode")))
+         ("code" (filename . "code"))
+	 ("Web Dev" (or (mode . html-mode)
+			(mode . css-mode)))
+	 ("Subversion" (name . "\*svn"))
+	 ("Magit" (name . "\*magit"))
+	 ("ERC" (mode . erc-mode))
+	 ("Help" (or (name . "\*Help\*")
+		     (name . "\*Apropos\*")
+		     (name . "\*info\*"))))))
+
+(add-hook 'ibuffer-mode-hook 
+	  '(lambda ()
+	     (ibuffer-auto-mode 1)
+	     (ibuffer-switch-to-saved-filter-groups "code")))
+
+;; C-k kill line and region
+(defun kill-line-or-region (beg end) 
+ "kill region if active only or kill line normally"
+  (interactive "r")
+  (if (region-active-p)
+      (call-interactively 'kill-region)
+    (call-interactively 'kill-line)))
+  (global-set-key (kbd "C-k") 'kill-line-or-region)
+
+;; C- left/right/up/down arrow, move cursor to different window
+(when (fboundp 'windmove-default-keybindings)
+      (windmove-default-keybindings))
+    (global-set-key (kbd "<C-left>")  'windmove-left)
+    (global-set-key (kbd "<C-right>") 'windmove-right)
+    (global-set-key (kbd "<C-up>")    'windmove-up)
+    (global-set-key (kbd "<C-down>")  'windmove-down)
+
+;; M-j, keep this to join multiple lines to one line
+(global-set-key (kbd "M-j")
+            (lambda ()
+                  (interactive)
+                  (join-line -1)))
+
+
+;; Use ido everywhere
+(require 'ido-ubiquitous)
+(ido-ubiquitous-mode 1)
+
+;; Fix ido-ubiquitous for newer packages
+(defmacro ido-ubiquitous-use-new-completing-read (cmd package)
+  `(eval-after-load ,package
+     '(defadvice ,cmd (around ido-ubiquitous-new activate)
+        (let ((ido-ubiquitous-enable-compatibility nil))
+          ad-do-it))))
+
+(ido-ubiquitous-use-new-completing-read webjump 'webjump)
+(ido-ubiquitous-use-new-completing-read yas/expand 'yasnippet)
+(ido-ubiquitous-use-new-completing-read yas/visit-snippet-file 'yasnippet)
+
+;; C-RET, C-S_RET, add new line below/above, even cursor in the middle of current line
+(defun open-line-below ()
+  (interactive)
+  (end-of-line)
+  (newline)
+  (indent-for-tab-command))
+
+(defun open-line-above ()
+  (interactive)
+  (beginning-of-line)
+  (newline)
+  (forward-line -1)
+  (indent-for-tab-command))
+(global-set-key (kbd "<C-return>") 'open-line-below)
+(global-set-key (kbd "<C-S-return>") 'open-line-above)
+
+;; only display line number when use Goto Line
+(global-set-key [remap goto-line] 'goto-line-with-feedback)
+(defun goto-line-with-feedback ()
+  "Show line numbers temporarily, while prompting for the line number input"
+  (interactive)
+  (unwind-protect
+      (progn
+        (linum-mode 1)
+        (goto-line (read-number "Goto line: ")))
+    (linum-mode -1)))
