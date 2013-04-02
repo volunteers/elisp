@@ -150,10 +150,10 @@ With argument ARG, do this that many times."
 
 
 
-(load "myC.el")
+;; (load "myC.el")
 
-(require 'autopair)		     ;not working because of above myC.el
-(autopair-global-mode) ;; enable autopair in all buffers
+;; (require 'autopair)		     ;not working because of above myC.el
+;; (autopair-global-mode) ;; enable autopair in all buffers
 
 (defun my-make-CR-do-indent ()
             (define-key c-mode-base-map "\C-m" 'c-context-line-break))
@@ -269,13 +269,13 @@ With argument ARG, do this that many times."
 (global-set-key (kbd "<C-return>") 'open-line-below)
 (global-set-key (kbd "<C-S-return>") 'open-line-above)
 
-;; only display line number when use Goto Line
-(global-set-key [remap goto-line] 'goto-line-with-feedback)
-(defun goto-line-with-feedback ()
-  "Show line numbers temporarily, while prompting for the line number input"
-  (interactive)
-  (unwind-protect
-      (progn
-        (linum-mode 1)
-        (goto-line (read-number "Goto line: ")))
-    (linum-mode -1)))
+;; only display line number when use Goto Line ;; don't like it
+;; (global-set-key [remap goto-line] 'goto-line-with-feedback)
+;; (defun goto-line-with-feedback ()
+;;   "Show line numbers temporarily, while prompting for the line number input"
+;;   (interactive)
+;;   (unwind-protect
+;;       (progn
+;;         (linum-mode 1)
+;;         (goto-line (read-number "Goto line: ")))
+;;     (linum-mode -1)))
